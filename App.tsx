@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Play, Square, History, LayoutDashboard, Home, Settings, Trophy, Activity, SwitchCamera, Lock, Unlock, Crown, AlertCircle, Bell, Send, QrCode } from 'lucide-react';
 import CameraFeed, { CameraHandle } from './components/CameraFeed';
@@ -490,7 +491,7 @@ function App() {
           <div className="flex flex-col h-full p-4 space-y-4">
             
             {/* Camera Section - Enlarged */}
-            <div className="relative w-full h-[50vh] bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10 group shrink-0">
+            <div className="relative w-full h-[35vh] bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10 group shrink-0">
               <CameraFeed ref={cameraRef} onError={handleCameraError} facingMode={facingMode} />
               
               {/* Overlay Gradient */}
@@ -579,7 +580,7 @@ function App() {
 
         {view === 'stats' && (
             <div className="h-full overflow-y-auto custom-scrollbar">
-                <StatsView stats={stats} />
+                <StatsView stats={stats} logs={logs} />
             </div>
         )}
 
