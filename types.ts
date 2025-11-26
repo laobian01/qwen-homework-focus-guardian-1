@@ -1,8 +1,10 @@
+
 export enum FocusStatus {
   IDLE = 'IDLE',
   FOCUSED = 'FOCUSED',
   DISTRACTED = 'DISTRACTED',
   ABSENT = 'ABSENT',
+  BAD_POSTURE = 'BAD_POSTURE', // New status for vision protection
   ERROR = 'ERROR'
 }
 
@@ -33,6 +35,7 @@ export interface UserStats {
   currentStreakSeconds: number;
   longestStreakSeconds: number;
   distractionCount: number;
+  postureAlertCount: number; // Track posture issues
   badges: string[]; // IDs of unlocked badges
 }
 

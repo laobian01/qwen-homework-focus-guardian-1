@@ -54,6 +54,7 @@ function App() {
     currentStreakSeconds: 0,
     longestStreakSeconds: 0,
     distractionCount: 0,
+    postureAlertCount: 0,
     badges: []
   });
   const [newBadge, setNewBadge] = useState<Badge | null>(null);
@@ -211,6 +212,10 @@ function App() {
       } else if (newStatus === FocusStatus.DISTRACTED || newStatus === FocusStatus.ABSENT) {
         newStats.currentStreakSeconds = 0;
         newStats.distractionCount += 1;
+      } else if (newStatus === FocusStatus.BAD_POSTURE) {
+        newStats.postureAlertCount = (newStats.postureAlertCount || 0) + 1;
+        // Also count as focus time since they are present and working (just bad posture)
+        newStats.totalFocusTimeSeconds += Math.floor(validElapsed);
       }
 
       const earnedBadge = checkBadges(newStats, newStats.badges);
@@ -275,14 +280,14 @@ function App() {
       }
 
       // Only Speak/Notify if CONFIRMED distraction (finalStatus is bad)
-      if (finalStatus === FocusStatus.DISTRACTED || finalStatus === FocusStatus.ABSENT) {
+      if (finalStatus === FocusStatus.DISTRACTED || finalStatus === FocusStatus.ABSENT || finalStatus === FocusStatus.BAD_POSTURE) {
         speak(finalMessage, finalStatus);
         
         // Use Hardcoded Token
         if (notifyEnabled && WX_APP_TOKEN && WX_APP_TOKEN.startsWith("AT_") && wxUid) {
             const now = Date.now();
             if (now - lastNotificationTimeRef.current > NOTIFICATION_COOLDOWN_MS) {
-                const statusText = finalStatus === FocusStatus.DISTRACTED ? '分心' : '离开座位';
+                const statusText = finalStatus === FocusStatus.BAD_POSTURE ? '坐姿不端' : (finalStatus === FocusStatus.DISTRACTED ? '分心' : '离开座位');
                 const content = `【专注卫士】提醒：检测到孩子${statusText}。\n当前状态：${finalMessage}`;
                 
                 sendWeChatNotification(WX_APP_TOKEN, [wxUid], content)
@@ -378,6 +383,7 @@ function App() {
       case FocusStatus.FOCUSED: return 'from-gray-900 via-green-900/20 to-gray-900';
       case FocusStatus.DISTRACTED: return 'from-gray-900 via-red-900/20 to-gray-900';
       case FocusStatus.ABSENT: return 'from-gray-900 via-yellow-900/20 to-gray-900';
+      case FocusStatus.BAD_POSTURE: return 'from-gray-900 via-blue-900/20 to-gray-900';
       default: return 'from-gray-900 via-blue-900/10 to-gray-900';
     }
   };
@@ -566,7 +572,8 @@ function App() {
                          <span className="font-mono text-gray-500 min-w-[50px]">{log.timestamp.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</span>
                          <span className={`font-medium ${
                            log.status === FocusStatus.DISTRACTED ? 'text-red-400' : 
-                           log.status === FocusStatus.FOCUSED ? 'text-green-400' : 'text-gray-300'
+                           log.status === FocusStatus.FOCUSED ? 'text-green-400' : 
+                           log.status === FocusStatus.BAD_POSTURE ? 'text-blue-400' : 'text-gray-300'
                          }`}>
                             {log.message}
                          </span>
